@@ -1,0 +1,7 @@
+#!/bin/bash
+for ((time = 21; time > 20; time=time-0.2))
+    do
+        echo "Tested delayed time is - " $time >> Result.txt
+        sudo python3 Test.py time >> Result.txt
+        sudo mn -c
+        done

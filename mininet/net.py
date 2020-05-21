@@ -210,6 +210,7 @@ class Mininet( object ):
            params: parameters for host
            returns: added host"""
         # Default IP and MAC addresses
+        self.name=name
         defaults = { 'ip': ipAdd( self.nextIP,
                                   ipBaseNum=self.ipBaseNum,
                                   prefixLen=self.prefixLen ) +
@@ -252,6 +253,7 @@ class Mininet( object ):
            cls: custom switch class/constructor (optional)
            returns: added switch
            side effect: increments listenPort ivar ."""
+        self.name = name #My mutation
         defaults = { 'listenPort': self.listenPort,
                      'inNamespace': self.inNamespace }
         defaults.update( params )

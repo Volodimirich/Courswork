@@ -28,8 +28,8 @@ def moduleDeps( subtract=None, add=None ):
        add: string or list of module names to add, if not already loaded"""
     subtract = subtract if subtract is not None else []
     add = add if add is not None else []
-    if isinstance( subtract, BaseString ):
-        subtract = [ subtract ]
+##    if isinstance( subtract, BaseString ):
+##       subtract = [ subtract ]
     if isinstance( add, BaseString ):
         add = [ add ]
     for mod in subtract:
