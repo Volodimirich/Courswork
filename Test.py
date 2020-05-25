@@ -8,7 +8,6 @@ import sys
 import threading 
 from mininet.node import OVSController
 
-lock = threading.Lock()
 
 #This function creating matrix of incidence
 def graphnet(key1,key2,graph:dict) -> None:
@@ -45,19 +44,16 @@ def dijkstra_path(start, end, graph: dict):
 
 #To begin execution of predefined functions
 def prescript(type,sem:bool, host1,host2) -> None:
-    #if sem:
-        #lock = threading.Lock()
-        #lock.acquire()
     if type=="Server":
         print(host2.cmd("iperf -s -u -i 0.2 -t 20"))
     elif type=="Client":
         time.sleep(0.1)
         print(host1.cmd("iperf -c 10.0.0.3 -u -b  10m -t 20"))
     else:
-        time.sleep(int(type))
+        if (sem):
+            threading.Event().wait(type)
         subprocess.run("ovs-ofctl add-flow s1 in_port=4,actions=output:2",shell=True, executable='/bin/bash')
-    #if sem:
-        #lock.release()
+
 
 
 if __name__ == "__main__":        
@@ -99,7 +95,6 @@ if __name__ == "__main__":
     thread1 = threading.Thread(target=prescript, args=("Server",Semaf,Host2,Host3))
     thread2 = threading.Thread(target=prescript, args=("Client",Semaf,Host2,Host3))
     thread3 = threading.Thread(target=prescript, args=(float(sys.argv[1]),Semaf,Host2,Host3))
-    lock = threading.Lock()
 
     thread1.start()
     thread2.start()
