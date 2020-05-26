@@ -49,13 +49,12 @@ def prescript(type, sem, host):
     if type == "Server":
         print(host.cmd("iperf -s -u -i 0.2 -t 20"))
     elif type == "Client":
-        time.sleep(0.1)
         print(host.cmd("iperf -c 10.0.0.3 -u -b  10m -t 20"))
     else:
         if sem:
             print("delayed time is - ", type)
             threading.Event().wait(type)
-        # subprocess.run("ovs-ofctl add-flow s1 in_port=4,actions=output:2",shell=True, executable='/bin/bash')
+            subprocess.run("ovs-ofctl add-flow s1 in_port=4,actions=output:2",shell=True, executable='/bin/bash')
 
 def timeset(way, labels, time_exp):
     time_total = time.clock()
@@ -110,6 +109,7 @@ if __name__ == "__main__":
     delay_way1 = timeset(Way1, time_labels, 20) #TODO make some predictions about time
     delay_way2 = timeset(Way2, time_labels, 1)
     sem = True if (delay_way1 + delay_way2) != 0 else False
+
     print(delay_way2)
 
     thread1 = threading.Thread(target=prescript, args=("Server", sem, host3))

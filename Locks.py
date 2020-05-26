@@ -2,10 +2,12 @@ from mininet.net import Mininet
 import subprocess
 import copy
 import threading
+import random
 import sys
+import time
 from mininet.node import OVSController
 
-
+stop=threading.Event()
 
 def graphnet(key1, key2, graph: dict) -> None:
     """This function creating matrix of incidence"""
@@ -40,16 +42,30 @@ def dijkstra_path(start, end, graph: dict):
     return weight[end][1][1:]
 
 #To begin execution of predefined functions
-def prescript(type, sem, host):
+def prescript(type, sem, seting, host):
     if type == "Server":
-        print(host.cmd("iperf -s -u -i 0.2 -t 20"))
+        print(host.cmd("iperf -s -u -i 10 -t 20"))
     elif type == "Client":
+        stop.set()
         print(host.cmd("iperf -c 10.0.0.3 -u -b  10m -t 20"))
-    else:
+    elif type == "S0":
         if (sem):
-            threading.Event().wait(type)
-        # subprocess.run("ovs-ofctl add-flow s1 in_port=4,actions=output:2",shell=True, executable='/bin/bash')
+            stop.wait()
+            stop.wait()
+            stop.clear()
+            stop.wait(seting-time.clock())
+            subprocess.run("ovs-ofctl add-flow s0 in_port=2,actions=output:4", shell=True, executable='/bin/bash')
+            stop.set()
+            print(stop.is_set())
 
+    elif type == "S1":
+        if (sem):
+            stop.wait()
+            stop.clear()
+            stop.wait(seting-time.clock())
+            stop.clear()
+            subprocess.run("ovs-ofctl add-flow s1 in_port=4,actions=output:2",shell=True, executable='/bin/bash')
+            stop.set()
 
 if __name__ == "__main__":        
     net = Mininet(controller = OVSController, cleanup = True)
@@ -81,20 +97,33 @@ if __name__ == "__main__":
     net.build()      #Build network
 
     Way1 = set(dijkstra_path('h2', 'h3', graph_tree))  #Used vertexes were found
-    Way2 = {'s1'}  #Used vertexes were found
-    sem = True if Way1 & Way2 else False
-
+    Way2 = {'s0'}  #Used vertexes were found
+    Way3 = {'s1'}
+    sem = True if (Way1 & Way2) or (Way1 & Way3) else False
+    # Get two random time
+    delay =  [random.triangular(5,20,random.normalvariate(20,6)), random.triangular(5,20,random.normalvariate(20,6))]
+    delay.sort()
+    print("Delay")
+    print(delay)
 
     net.start()
-    thread1 = threading.Thread(target=prescript, args=("Server", sem, host3))
-    thread2 = threading.Thread(target=prescript, args=("Client", sem, host2))
-    thread3 = threading.Thread(target=prescript, args=(float(sys.argv[1]), sem, None))
+
+    # subprocess.run("ovs-ofctl add-flow s0 in_port=2,actions=output:1", shell=True, executable='/bin/bash')
+    # subprocess.run("ovs-ofctl add-flow s1 in_port=4,actions=output:2", shell=True, executable='/bin/bash')
+
+    thread1 = threading.Thread(target=prescript, args=("Server", sem, None, host3))
+    thread2 = threading.Thread(target=prescript, args=("Client", sem, None, host2))
+    thread3 = threading.Thread(target=prescript, args=("S1", sem, delay[0], None))
+    thread4 = threading.Thread(target=prescript, args=("S0", sem, delay[1]-delay[0], None))
 
     thread1.start()
     thread2.start()
     thread3.start()
+    thread4.start()
+
     thread1.join()
     thread2.join()
     thread3.join()
+    thread4.join()
 
     net.stop()
