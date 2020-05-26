@@ -101,7 +101,6 @@ if __name__ == "__main__":
     Way2 = {'s1'}  #Used vertexes were found
 
 
-    # print(Semaf,Way1,Way2,dijkstra_path('h2','h3',graph_tree))
 
     net.start()
 

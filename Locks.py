@@ -108,8 +108,6 @@ if __name__ == "__main__":
 
     net.start()
 
-    # subprocess.run("ovs-ofctl add-flow s0 in_port=2,actions=output:1", shell=True, executable='/bin/bash')
-    # subprocess.run("ovs-ofctl add-flow s1 in_port=4,actions=output:2", shell=True, executable='/bin/bash')
 
     thread1 = threading.Thread(target=prescript, args=("Server", sem, None, host3))
     thread2 = threading.Thread(target=prescript, args=("Client", sem, None, host2))
